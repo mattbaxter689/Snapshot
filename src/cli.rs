@@ -18,6 +18,9 @@ pub enum Command {
     Ingest {
         #[arg(long, short, default_value = "features.toml")]
         config: PathBuf,
+
+        #[arg(long, short, default_value = "data.parqut")]
+        file: PathBuf,
         // This will be used later
         // #[arg(long, short)]
         // file: PathBuf,
