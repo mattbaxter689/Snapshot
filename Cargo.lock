@@ -817,7 +817,7 @@ dependencies = [
  "object_store",
  "parking_lot",
  "parquet",
- "sqlparser",
+ "sqlparser 0.62.0",
  "tempfile",
  "tokio",
  "url",
@@ -895,7 +895,7 @@ dependencies = [
  "object_store",
  "parquet",
  "recursive",
- "sqlparser",
+ "sqlparser 0.62.0",
  "tokio",
  "uuid",
  "web-time",
@@ -1103,7 +1103,7 @@ dependencies = [
  "recursive",
  "serde",
  "serde_json",
- "sqlparser",
+ "sqlparser 0.62.0",
 ]
 
 [[package]]
@@ -1440,7 +1440,7 @@ dependencies = [
  "log",
  "recursive",
  "regex",
- "sqlparser",
+ "sqlparser 0.62.0",
  "stacker",
 ]
 
@@ -2665,6 +2665,7 @@ dependencies = [
  "datafusion",
  "serde",
  "serde_json",
+ "sqlparser 0.64.0",
  "toml",
 ]
 
@@ -2676,7 +2677,18 @@ checksum = "13c6d1b651dc4edf07eead2a0c6c78016ce971bc2c10da5266861b13f25e7cec"
 dependencies = [
  "log",
  "recursive",
- "sqlparser_derive",
+ "sqlparser_derive 0.5.0",
+]
+
+[[package]]
+name = "sqlparser"
+version = "0.64.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92e0d273b4f8ddd14a35ed36862acbc9cc96cec578e36ee1881a9d42e0e0f2c8"
+dependencies = [
+ "log",
+ "recursive",
+ "sqlparser_derive 0.7.0",
 ]
 
 [[package]]
@@ -2688,6 +2700,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "sqlparser_derive"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fa4939c717eaef717f244768d35a5f93c62e1d440865097d2edef7d86ddb7e0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.10",
 ]
 
 [[package]]
