@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::{Result, bail};
 
-use crate::spec::feature_config::FeatureSetConfig;
+use crate::config::feature_config::FeatureSetConfig;
 
 #[derive(Debug)]
 pub struct TableSpec {

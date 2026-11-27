@@ -1,7 +1,7 @@
 use clap::Parser;
 use snapshot::{
     cli::{Cli, Command},
-    spec::{feature_config::FeatureSetConfig, table_spec::TableSpec},
+    config::{feature_config::FeatureSetConfig, table_spec::TableSpec},
 };
 use std::path::{Path, PathBuf};
 

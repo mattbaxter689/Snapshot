@@ -4,8 +4,8 @@ use std::{collections::HashSet, fs, path::Path};
 use anyhow::{Context, Result, bail};
 use serde::Deserialize;
 
-use crate::spec::non_neg::NonNegative;
-use crate::spec::verify_sql::{extract_required_columns, parse};
+use crate::config::non_neg::NonNegative;
+use crate::sql_verify::verify_sql::{extract_required_columns, parse};
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
