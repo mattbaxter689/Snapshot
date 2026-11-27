@@ -1,9 +1,11 @@
+use std::vec;
 use std::{collections::HashSet, fs, path::Path};
 
 use anyhow::{Context, Result, bail};
 use serde::Deserialize;
 
 use crate::spec::non_neg::NonNegative;
+use crate::spec::verify_sql::{extract_required_columns, parse};
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -102,38 +104,29 @@ impl FeatureRule {
     }
 
     fn ensure_bounds(&self, rule_label: &str) -> Option<String> {
-        if let (Some(min), Some(max)) = (self.min_bound, self.max_bound) {
-            if !(min < max) {
-                return Some(format!(
-                    "Feature `{}`: min bound ({}) cannot be greater than max bound ({})",
-                    rule_label, min, max
-                ));
-            }
+        match (self.min_bound, self.max_bound) {
+            (Some(min), Some(max)) if min > max => Some(format!(
+                "Feature `{rule_label}`: min bound ({min}) cannot be greater than max bound ({max})"
+            )),
+            _ => None,
         }
-        None
     }
 
     fn validate_sql_expr(expr: &str) -> Option<String> {
-        let trimmed = expr.trim();
+        parse(expr)
+            .err()
+            .map(|e| format!("Invalid sql_expr `{expr}`: {e}"))
+    }
 
-        let mut disallowed_token: Vec<String> = Vec::new();
-        // Lightweight guard for statement injection or multistatement strings
-        let upper = trimmed.to_ascii_uppercase();
-        for forbidden in [
-            ";", "--", "/*", "DROP ", "DELETE ", "INSERT ", "UPDATE ", "ALTER ", "CREATE ",
-        ] {
-            if upper.contains(forbidden) {
-                disallowed_token.push(forbidden.to_string());
-            }
+    pub fn required_columns(&self) -> Result<Vec<String>> {
+        match (&self.source_col, &self.sql_expr) {
+            (Some(col), None) => Ok(vec![col.trim().to_string()]),
+            (None, Some(expr)) => extract_required_columns(expr.trim()),
+            _ => bail!(
+                "Feature `{}`: needs exactly one of source_col or sql_expr",
+                self.name
+            ),
         }
-
-        if !disallowed_token.is_empty() {
-            return Some(format!(
-                "Disallowed tokens found in sql_expr: `{}`",
-                disallowed_token.join(",")
-            ));
-        }
-        None
     }
 }
 
@@ -191,5 +184,20 @@ impl FeatureSetConfig {
         }
 
         Ok(all_errors)
+    }
+
+    pub fn required_columns(&self) -> Result<Vec<String>> {
+        let mut cols = vec![
+            self.feature_set.entity_key.clone(),
+            self.feature_set.event_timestamp.clone(),
+        ];
+        for rule in &self.features {
+            for c in rule.required_columns()? {
+                if !cols.contains(&c) {
+                    cols.push(c);
+                }
+            }
+        }
+        Ok(cols)
     }
 }

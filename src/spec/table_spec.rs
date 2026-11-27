@@ -10,6 +10,7 @@ pub struct TableSpec {
     pub required_columns: Vec<String>,
     pub format: Format,
     pub file_path: PathBuf,
+    pub file_name: String,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -25,5 +26,18 @@ impl TableSpec {
             Some("csv") => Format::Csv,
             _ => bail!("Unsupported file extension. We only accept parquet and csv files"),
         };
+
+        let file_name = path
+            .file_stem()
+            .map(|s| s.to_string_lossy().into_owned())
+            .unwrap_or_default();
+
+        Ok(Self {
+            name: config.feature_set.name.clone(),
+            required_columns: config.required_columns()?,
+            format,
+            file_path: path,
+            file_name,
+        })
     }
 }
