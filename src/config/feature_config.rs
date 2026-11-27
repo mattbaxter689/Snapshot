@@ -72,6 +72,7 @@ impl FeatureRule {
             name => name,
         };
 
+        // Ensure that ONE of sql_expr or source_col exit
         match (
             Self::trimmed(&self.sql_expr),
             Self::trimmed(&self.source_col),
@@ -97,8 +98,9 @@ impl FeatureRule {
                 "Feature `{label}`: `source_col` is required when `sql_expr` is not set"
             )),
         }
-        // Ensure the bounds are correct
+        // Ensure the bounds and null ratio are correct
         errors.extend(self.ensure_bounds(label));
+        errors.extend(self.ensure_max_null());
 
         (!errors.is_empty()).then_some(errors)
     }
@@ -108,6 +110,15 @@ impl FeatureRule {
             (Some(min), Some(max)) if min > max => Some(format!(
                 "Feature `{rule_label}`: min bound ({min}) cannot be greater than max bound ({max})"
             )),
+            _ => None,
+        }
+    }
+
+    fn ensure_max_null(&self) -> Option<String> {
+        match self.max_null_ratio.get() {
+            ratio if !(0.00..=1.00).contains(&ratio) => {
+                Some(format!("Max null ratio must be between 0 and 1: {}", ratio))
+            }
             _ => None,
         }
     }
