@@ -14,6 +14,7 @@ fn main() {
             };
         }
         Command::Infer { config } => println!("config loc {}", config.display()),
+        Command::Plan {} => todo!(),
     }
 }
 
