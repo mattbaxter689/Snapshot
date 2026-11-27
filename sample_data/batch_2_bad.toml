@@ -1,0 +1,35 @@
+# Contract for batch_2_bad.parquet
+# Expected: FAIL.
+#   latency_ms : 5 rows < 0, 5 rows > 5000 (bounds)
+#   cpu_util   : ~40% nulls vs max_null_ratio 0.10
+#   error_rate : 6 rows > 1.0, NULLs from NULL request_count/error_count,
+#                and 8 rows with request_count = 0 that the CASE guard handles
+
+[feature_set]
+name = "service_health"
+entity_key = "entity_id"
+event_timestamp = "event_ts"
+
+# 1. Clean preset: direct column mapping with a bound and a small null tolerance.
+[[features]]
+name = "latency_ms"
+source_col = "latency_ms"
+min_bound = 0.0
+max_bound = 5000.0
+max_null_ratio = 0.05
+
+# 2. Custom sql_expr: guarded ratio. Edge cases: request_count = 0 or NULL.
+[[features]]
+name = "error_rate"
+sql_expr = "CASE WHEN request_count = 0 THEN 0.0 ELSE CAST(error_count AS DOUBLE) / request_count END"
+min_bound = 0.0
+max_bound = 1.0
+max_null_ratio = 0.0
+
+# 3. Tight null threshold, easy to trip on purpose.
+[[features]]
+name = "cpu_util"
+source_col = "cpu_util"
+min_bound = 0.0
+max_bound = 1.0
+max_null_ratio = 0.10
